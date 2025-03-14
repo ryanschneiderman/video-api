@@ -1,0 +1,15 @@
+# Go build artifacts
+/bin/
+/obj/
+/vendor/
+*.exe
+*.out
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# Environment variables
+.env
+
+.terraform
