@@ -16,7 +16,7 @@ var (
 			Name: "myapp_http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
-		[]string{"path", "method"},
+		[]string{"path", "method", "status"},
 	)
 
 	HTTPRequestDuration = prometheus.NewHistogramVec(
@@ -25,7 +25,7 @@ var (
 			Help:    "Histogram of latencies for HTTP requests",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"path", "method"},
+		[]string{"path", "method", "status"},
 	) 
 	WorkerProcessingDuration = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
