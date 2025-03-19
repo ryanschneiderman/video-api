@@ -27,27 +27,28 @@ jobs:
         with:
             terraform_version: 1.10.0
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Login to ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 498061775412.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Build API Docker image
         run: |
-          docker build -f cmd/api/Dockerfile -t twelve-labs-demo-api .
-          docker tag twelve-labs-demo-api:latest 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/api:latest
-
-      - name: Push API Docker image
-        run: |
-          docker push 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/api:latest
+          docker buildx build \
+            --platform linux/arm64 \
+            -f cmd/api/Dockerfile \
+            -t 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/api:latest \
+            --push .
 
       - name: Build Worker Docker image
         run: |
-          docker build -f cmd/video_processor/Dockerfile -t twelve-labs-demo-worker .
-          docker tag twelve-labs-demo-worker:latest 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/video-processor:latest
-
-      - name: Push Worker Docker image
-        run: |
-          docker push 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/video-processor:latest
+          docker buildx build \
+            --platform linux/arm64 \
+            -f cmd/video_processor/Dockerfile \
+            -t 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/video-processor:latest \
+            --push .
 
       - name: Run Terraform
         run: |
