@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+kind: PodMonitor
 metadata:
-    name: myapp-servicemonitor
+    name: twelve-labs-worker-podmonitor
     namespace: monitoring
     labels:
         release: prometheus-grafana
@@ -11,8 +11,8 @@ spec:
             - default
     selector:
         matchLabels:
-            app: twelve-labs-demo-api
-    endpoints:
-        - port: http
+            app: twelve-labs-demo-video-processor
+    podMetricsEndpoints:
+        - port: metrics
           path: /metrics
           interval: 30s

@@ -45,6 +45,8 @@ var (
 func RegisterMetrics() {
 	prometheus.MustRegister(HTTPRequestTotal)
 	prometheus.MustRegister(HTTPRequestDuration)
+	prometheus.MustRegister(WorkerProcessingDuration)
+	prometheus.MustRegister(WorkerErrors)
 }
 
 func InstrumentHandler(path string, handlerFunc func() error) func() error {

@@ -25,3 +25,6 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.videoProcessor.resources | nindent 12 }}
+          ports:
+            - name: metrics
+              containerPort: 9090

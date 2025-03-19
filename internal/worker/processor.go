@@ -26,14 +26,12 @@ type Processor struct {
 	DB       *db.DB
 }
 
-// Define a struct that matches your JSON message format.
 type SQSMessage struct {
 	VideoID  string `json:"video_id"`
 	Filename string `json:"filename"`
-	EventType string `json:"event_type,omitempty"` // optional, for versioning/future-proofing
+	EventType string `json:"event_type,omitempty"`
 }
 
-// NewProcessor creates a new Processor using the shared App.
 func NewProcessor(app *app.App) *Processor {
 	return &Processor{
 		SQSClient: app.SQSClient,
@@ -44,14 +42,13 @@ func NewProcessor(app *app.App) *Processor {
 	}
 }
 
-// ProcessMessages polls SQS for messages, processes them, and deletes them.
 func (p *Processor) ProcessMessages(ctx context.Context) error {
 	output, err := p.SQSClient.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
 		QueueUrl:            aws.String(p.QueueURL),
 		MaxNumberOfMessages: 5, // Processes 5 messages concurrently, increase this value to increase throughput
 		WaitTimeSeconds:     10,
 		AttributeNames: []types.QueueAttributeName{
-			types.QueueAttributeName("ApproximateReceiveCount"), // ✅ Convert string explicitly
+			types.QueueAttributeName("ApproximateReceiveCount"), 
 		},
 	})
 	if err != nil {
@@ -63,7 +60,6 @@ func (p *Processor) ProcessMessages(ctx context.Context) error {
 		return nil
 	}
 
-	// Process messages concurrently
 	for _, msg := range output.Messages {
 		go func(msg types.Message) {
 			if err := p.handleMessage(ctx, &msg); err != nil {
@@ -88,7 +84,6 @@ func (p *Processor) handleMessage(ctx context.Context, msg *types.Message) error
 
 	if err := p.ProcessVideo(ctx, sqsMsg.VideoID, sqsMsg.Filename); err != nil {
 		log.Printf("Error processing video %s: %v", sqsMsg.VideoID, err)
-		// return the error to allow sqs to retry
 		return err
 	}
 

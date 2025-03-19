@@ -3,7 +3,6 @@ FROM golang:1.24-alpine AS builder
 
 RUN apk add --no-cache git
 
-# Set environment variables for ARM64 build
 ENV GOOS=linux
 ENV GOARCH=arm64
 ENV CGO_ENABLED=0

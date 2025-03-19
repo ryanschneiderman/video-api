@@ -1,11 +1,10 @@
-# Global values that might be shared across services (optional)
+# TODO: refactor to use these globals
 global:
     awsRegion: "us-east-1"
     s3Bucket: "498061775412-twelve-labs-video-storage"
     dynamodbTable: "twelve-labs-videos"
     sqsQueueUrl: "https://sqs.us-east-1.amazonaws.com/498061775412/video-processing-queue"
 
-# Values for the API service
 api:
     replicaCount: 1
     image:

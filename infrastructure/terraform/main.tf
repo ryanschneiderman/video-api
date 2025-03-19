@@ -13,7 +13,6 @@ locals {
   service_account_name = "twelve-labs-sa"
 }
 
-# S3 Bucket for Video Storage
 resource "aws_s3_bucket" "video_storage" {
   bucket = "${var.aws_account}-twelve-labs-video-storage"
 }
@@ -48,13 +47,11 @@ resource "aws_dynamodb_table" "videos" {
   }
 }
 
-# Create a dead-letter queue
 resource "aws_sqs_queue" "dlq" {
   name = "video-processing-dlq"
 }
 
 
-# SQS Queue for Processing Events
 resource "aws_sqs_queue" "video_processing_queue" {
   name                       = "video-processing-queue"
   delay_seconds              = 0
@@ -64,6 +61,6 @@ resource "aws_sqs_queue" "video_processing_queue" {
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn,
-    maxReceiveCount     = 5 # After 5 receives, message goes to DLQ
+    maxReceiveCount     = 5
   })
 }
