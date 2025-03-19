@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "twelve-labs-demo.fullname" . }}-video-processor
+  labels:
+    app: {{ include "twelve-labs-demo.name" . }}-video-processor
+spec:
+  replicas: {{ .Values.videoProcessor.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "twelve-labs-demo.name" . }}-video-processor
+  template:
+    metadata:
+      labels:
+        app: {{ include "twelve-labs-demo.name" . }}-video-processor
+    spec:
+      serviceAccountName: {{ .Values.videoProcessor.serviceAccount.name }}
+      containers:
+        - name: video-processor
+          image: "{{ .Values.videoProcessor.image.repository }}:{{ .Values.videoProcessor.image.tag }}"
+          imagePullPolicy: {{ .Values.videoProcessor.image.pullPolicy }}
+          env:
+            {{- with .Values.videoProcessor.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.videoProcessor.resources | nindent 12 }}

@@ -1,0 +1,70 @@
+# Global values that might be shared across services (optional)
+global:
+    awsRegion: "us-east-1"
+    s3Bucket: "498061775412-twelve-labs-video-storage"
+    dynamodbTable: "twelve-labs-videos"
+    sqsQueueUrl: "https://sqs.us-east-1.amazonaws.com/498061775412/video-processing-queue"
+
+# Values for the API service
+api:
+    replicaCount: 2
+    image:
+        repository: 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/api
+        tag: latest
+        pullPolicy: Always
+    service:
+        type: LoadBalancer
+        port: 80
+        targetPort: 8080
+        sg_id: sg-003bc8378ca0fe289
+    serviceAccount:
+        create: false
+        name: twelve-labs-sa
+    resources:
+        limits:
+            cpu: 500m
+            memory: 512Mi
+        requests:
+            cpu: 250m
+            memory: 256Mi
+    env:
+        - name: S3_BUCKET
+          value: "498061775412-twelve-labs-video-storage"
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: DYNAMODB_TABLE
+          value: "twelve-labs-videos"
+        - name: SQS_QUEUE_URL
+          value: "https://sqs.us-east-1.amazonaws.com/498061775412/video-processing-queue"
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+videoProcessor:
+    replicaCount: 1
+    image:
+        repository: 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/video-processor
+        tag: latest
+        pullPolicy: Always
+    serviceAccount:
+        create: false
+        name: twelve-labs-sa
+    resources:
+        limits:
+            cpu: 500m
+            memory: 512Mi
+        requests:
+            cpu: 250m
+            memory: 256Mi
+    env:
+        - name: S3_BUCKET
+          value: "498061775412-twelve-labs-video-storage"
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: DYNAMODB_TABLE
+          value: "twelve-labs-videos"
+        - name: SQS_QUEUE_URL
+          value: "https://sqs.us-east-1.amazonaws.com/498061775412/video-processing-queue"
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}

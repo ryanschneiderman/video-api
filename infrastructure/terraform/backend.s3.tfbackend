@@ -1,0 +1,3 @@
+bucket = "498061775412-terraform-remote-state"
+key = "twelve_labs_demo/terraform.tfstate"
+region = "us-east-1"

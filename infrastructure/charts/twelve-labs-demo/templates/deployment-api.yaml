@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "twelve-labs-demo.fullname" . }}-api
+  labels:
+    app: {{ include "twelve-labs-demo.name" . }}-api
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "twelve-labs-demo.name" . }}-api
+  template:
+    metadata:
+      labels:
+        app: {{ include "twelve-labs-demo.name" . }}-api
+    spec:
+      serviceAccountName: {{ .Values.api.serviceAccount.name }}
+      containers:
+        - name: {{ include "twelve-labs-demo.name" . }}-api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.api.service.targetPort }}
+          env:
+            {{- with .Values.api.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}
+      {{- if .Values.api.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.api.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.api.tolerations }}
+      tolerations:
+        {{- toYaml .Values.api.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.api.affinity }}
+      affinity:
+        {{- toYaml .Values.api.affinity | nindent 8 }}
+      {{- end }}

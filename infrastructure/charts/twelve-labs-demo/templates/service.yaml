@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ include "twelve-labs-demo.fullname" . }}-api
+    labels:
+        app: {{ include "twelve-labs-demo.name" . }}-api
+    annotations:
+        service.beta.kubernetes.io/aws-load-balancer-security-groups: {{ .Values.api.service.sg_id }}
+spec:
+    type: {{ .Values.api.service.type }}
+    ports:
+        - port: {{ .Values.api.service.port }}
+          targetPort: {{ .Values.api.service.targetPort }}
+          protocol: TCP
+          name: http
+    selector:
+        app: {{ include "twelve-labs-demo.name" . }}-api

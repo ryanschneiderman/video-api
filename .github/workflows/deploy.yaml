@@ -1,0 +1,63 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::498061775412:role/github-actions-twelvelabs
+          aws-region: us-east-1
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+            terraform_version: 1.10.0
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 498061775412.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build API Docker image
+        run: |
+          docker build -f cmd/api/Dockerfile -t twelve-labs-demo-api .
+          docker tag twelve-labs-demo-api:latest 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/api:latest
+
+      - name: Push API Docker image
+        run: |
+          docker push 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/api:latest
+
+      - name: Build Worker Docker image
+        run: |
+          docker build -f cmd/video_processor/Dockerfile -t twelve-labs-demo-worker .
+          docker tag twelve-labs-demo-worker:latest 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/video-processor:latest
+
+      - name: Push Worker Docker image
+        run: |
+          docker push 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/video-processor:latest
+
+      - name: Run Terraform
+        run: |
+          cd infrastructure/terraform
+          terraform init --backend-config=backend.s3.tfbackend --reconfigure
+          terraform apply --var-file=dev.tfvars -auto-approve
+      - name: Deploy Helm chart to EKS
+
+        run: |
+          cd infrastructure
+          aws eks update-kubeconfig --name cluster1 --region us-east-1
+          helm upgrade --install twelve-labs-demo ./charts/twelve-labs-demo \
+            --namespace default \
