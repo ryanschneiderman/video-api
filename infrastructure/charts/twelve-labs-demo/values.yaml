@@ -7,7 +7,7 @@ global:
 
 # Values for the API service
 api:
-    replicaCount: 2
+    replicaCount: 1
     image:
         repository: 498061775412.dkr.ecr.us-east-1.amazonaws.com/twelve-labs/api
         tag: latest
