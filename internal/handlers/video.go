@@ -83,10 +83,8 @@ func (vh *VideoHandler) UploadVideo(c *gin.Context) {
 
 	log.Println("Successfully enqueued video processing message")
 
-	c.JSON(200, gin.H{
-		"video_id": videoID,
-		"url":      url,
-		"message":  "Video uploaded and metadata saved successfully",
+	c.JSON(201, gin.H{
+		"videoId": videoID,
 	})
 }
 
