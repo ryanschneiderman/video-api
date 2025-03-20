@@ -46,7 +46,7 @@ The system is composed of two main microservices:
 
 Both services are containerized and deployed on an EKS cluster. Monitoring is achieved by scraping metrics via ServiceMonitor/PodMonitor configurations, and dashboards are available in Grafana.
 
-Note: given the purely demo nature, security was implemented as a bare-bones measure. With more time, I would implement a more robust security strategy by building an ingress controller and looking into authentication and authorization using OAuth or something similarly secure.
+Note: given the purely demo nature of this application, security was implemented as a bare-bones measure. With more time, I would implement a more robust security strategy by building an ingress controller and looking into authentication and authorization using OAuth or something similarly secure.
 
 ## Prerequisites
 
@@ -147,10 +147,12 @@ kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
 
 ## Future Enhancements/Caveats
 
--   **More robust unit testing:**  
+-   **More robust unit testing:**
+
     Without much experience writing unit tests in Go, putting together unit tests that effectively covered base cases in my files was a challenge. Given more time, I would look into unit testing further to ensure robust testing.
 
 -   **Kubernetes Infrastructure**
+
     For demo purposes I went with a simpler kubernetes setup than I would have if I were configuring for a production environment.
 
     One of the enhancements I would make is to establish and ingress controller. For simplicities sake, I deployed my API service with a LoadBalancer service, but this isnt as scalable or configurable a solution as an ingress controller.
@@ -162,7 +164,9 @@ kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
     Currently I have my cluster running with BOTTLEROCKET_ARM_64 spot instances on a minimal t4g.medium instance type. This was configured for cost efficiency for a demo environment. In a production environment I would instrument the cluster with karpenter for increased scalability and reliability.
 
 -   **Decoupling Api from VideoProcessing Worker**
+
     For simplicities sake, I configured my repo to have both the video processing worker and the api together, but in a production environment I would write these in separate repos. Decoupling is a better approach for a number of reasons including independent development and deployment of the services (when you deploy one you dont have to deploy the other), improved maintainability (codebase becomes unwieldy if it contains multiple services as it grows), and in general better adherence to the principle of separation of concerns.
 
 -   **Real AI Integration**
+
     For the purposes of this demo, I didnt include any real AI integration into the VideoProcessing service because that would have increased the scope of the project dramatically. AI models are an area of interest for me, and I would be interested to learn more about what it would take to integrate with a real AI model.
