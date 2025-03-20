@@ -13,7 +13,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-var ErrVideoNotFound = errors.New("video not found")
+var (
+	ErrVideoNotFound = errors.New("video not found")
+	ErrInvalidInput  = errors.New("invalid input")
+)
 
 type Video struct {
 	VideoID     string    `dynamodbav:"video_id"`
@@ -24,12 +27,22 @@ type Video struct {
 	UploadDate  time.Time `dynamodbav:"upload_date"`
 }
 
+type DynamoDBClient interface {
+	PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
+	GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
+
+}
+
 type DB struct {
-	Client    *dynamodb.Client
+	Client    DynamoDBClient
 	TableName string
 }
 
 func NewDB(ctx context.Context, tableName string) (*DB, error) {
+	if tableName == "" {
+		return nil, fmt.Errorf("%w: table name cannot be empty", ErrInvalidInput)
+	}
+
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load AWS SDK config: %w", err)
@@ -43,6 +56,11 @@ func NewDB(ctx context.Context, tableName string) (*DB, error) {
 }
 
 func (db *DB) PutVideo(ctx context.Context, video Video) error {
+
+	if video.VideoID == "" {
+		return fmt.Errorf("%w: video ID cannot be empty", ErrInvalidInput)
+	}
+
 	av, err := attributevalue.MarshalMap(video)
 	if err != nil {
 		return fmt.Errorf("failed to marshal video: %w", err)
@@ -62,6 +80,10 @@ func (db *DB) PutVideo(ctx context.Context, video Video) error {
 }
 
 func (db *DB) GetVideoById(ctx context.Context, videoId string) (*Video, error) {
+	if videoId == "" {
+		return nil, fmt.Errorf("%w: video ID cannot be empty", ErrInvalidInput)
+	}
+
 	key := map[string]types.AttributeValue{
 		"video_id": &types.AttributeValueMemberS{Value: videoId},
 	}
@@ -72,12 +94,11 @@ func (db *DB) GetVideoById(ctx context.Context, videoId string) (*Video, error) 
 	}
 
 	result, err := db.Client.GetItem(ctx, input)
-
 	if err != nil {
-		return nil, fmt.Errorf("failed to get item from dynamoDb: %w", err)
+		return nil, fmt.Errorf("failed to get item from DynamoDB: %w", err)
 	}
 
-	if result.Item == nil {
+	if result.Item == nil || len(result.Item) == 0 {
 		return nil, ErrVideoNotFound
 	}
 

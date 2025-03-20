@@ -62,7 +62,7 @@ func (p *Processor) ProcessMessages(ctx context.Context) error {
 
 	for _, msg := range output.Messages {
 		go func(msg types.Message) {
-			if err := p.handleMessage(ctx, &msg); err != nil {
+			if err := p.HandleMessage(ctx, &msg); err != nil {
 				log.Printf("Error processing message: %v", err)
 			}
 		}(msg)
@@ -71,7 +71,7 @@ func (p *Processor) ProcessMessages(ctx context.Context) error {
 	return nil
 }
 
-func (p *Processor) handleMessage(ctx context.Context, msg *types.Message) error {
+func (p *Processor) HandleMessage(ctx context.Context, msg *types.Message) error {
 	var sqsMsg SQSMessage
 	if err := json.Unmarshal([]byte(aws.ToString(msg.Body)), &sqsMsg); err != nil {
 		log.Printf("Failed to parse SQS message JSON: %v", err)
