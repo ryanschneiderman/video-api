@@ -24,6 +24,7 @@ type Video struct {
 	Description string    `dynamodbav:"description"`
 	URL         string    `dynamodbav:"url"`
 	Tags        []string  `dynamodbav:"tags"`
+	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 	UploadDate  time.Time `dynamodbav:"upload_date"`
 }
 

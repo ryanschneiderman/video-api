@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ryanschneiderman/video-api/internal/app"
 	"github.com/ryanschneiderman/video-api/internal/db"
+	"github.com/ryanschneiderman/video-api/internal/mapper"
 )
 
 type VideoHandler struct {
@@ -63,6 +64,7 @@ func (vh *VideoHandler) UploadVideo(c *gin.Context) {
 		Title:       header.Filename,
 		Description: "A newly uploaded video",
 		URL:         url,
+		Metadata: nil,
 		Tags:        []string{},
 		UploadDate:  time.Now(),
 	}
@@ -98,6 +100,7 @@ func (vh *VideoHandler) GetVideo(c *gin.Context){
 
 	ctx := context.TODO() 
 	video, err := vh.DB.GetVideoById(ctx, videoId)
+	videoResponse := mapper.ToVideoResponse(video)
 	if err != nil{
 		if errors.Is(err, db.ErrVideoNotFound) {
 			log.Printf("Video not found with ID: %s", videoId)
@@ -107,9 +110,7 @@ func (vh *VideoHandler) GetVideo(c *gin.Context){
 		log.Printf("Failed to get video with ID: %s, error: %v", videoId, err)
 		c.JSON(500, gin.H{"error": "Failed to save video metadata"})
 	}
-	c.JSON(200, gin.H{
-		"video": video,
-	})
+	c.JSON(200, videoResponse)
 }
 
 func (vh *VideoHandler) uploadToS3(file multipart.File, filename string) (string, error) {
